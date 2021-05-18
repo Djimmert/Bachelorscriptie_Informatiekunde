@@ -5,6 +5,7 @@ from nltk.metrics import precision, recall
 
 from sklearn import svm
 from sklearn.svm import LinearSVC
+from sklearn.naive_bayes import MultinomialNB
 import sklearn.model_selection
 import sklearn.metrics
 
@@ -78,10 +79,10 @@ class Featurizer(TransformerMixin):
         d[len(text[0].text)] = 1
         return d
 
-def read_data():
+def read_data(filename):
     X_feats = []
     y_feats = []
-    with open("gro-ner-train.csv", encoding='utf-8') as f:
+    with open(filename, encoding='utf-8') as f:
 
         sentence = []
         
@@ -141,10 +142,16 @@ def train(X_train, y_train):
 
     return classifier
 
+def train_baseline(X_train, y_train):
+    classifier = MultinomialNB().fit(X_train, y_train)
+    
+    return classifier
+
 
 def main():
-    X_feats, y_feats = read_data()
-    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X_feats, y_feats, test_size=0.2)
+    X_train, y_train = read_data("gro-ner-train.csv")
+    X_test, y_test = read_data("gro-ner-test.csv")
+    # X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X_feats, y_feats, test_size=0.2)
     
     featurizer = Featurizer()
     vectorizer = DictVectorizer()
@@ -155,4 +162,23 @@ def main():
     X_train_ = vectorizer.fit_transform(X_train_dict)
     X_test_ = vectorizer.transform(X_test_dict)
 
+    # NB
+    classifier = train_baseline(X_train_, y_train)
+    # Evaluation
+    sklearn.metrics.plot_confusion_matrix(classifier, X_test_, y_test)
+    y_pred = classifier.predict(X_test_)
+    print("Multinomial NB baseline")
+    print(sklearn.metrics.precision_score(y_test, y_pred, average="macro"))
+    print(sklearn.metrics.recall_score(y_test, y_pred, average="macro"))
+    print(sklearn.metrics.f1_score(y_test, y_pred, average="macro"))
+
+    
+    # SVC
     classifier = train(X_train_, y_train)
+    # Evaluation
+    sklearn.metrics.plot_confusion_matrix(classifier, X_test_, y_test)
+    y_pred = classifier.predict(X_test_)
+    print("Support vector classifier")
+    print(sklearn.metrics.precision_score(y_test, y_pred, average="macro"))
+    print(sklearn.metrics.recall_score(y_test, y_pred, average="macro"))
+    print(sklearn.metrics.f1_score(y_test, y_pred, average="macro"))
