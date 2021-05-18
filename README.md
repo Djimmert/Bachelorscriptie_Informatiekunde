@@ -7,3 +7,5 @@ Support Vector Classifier
 Precision	0.8091166667541795
 Recall	0.42849691950709795
 F1	0.5202698734989499
+
+These scores are macro averages of the scores per label.
