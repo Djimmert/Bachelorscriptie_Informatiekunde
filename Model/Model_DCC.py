@@ -49,6 +49,14 @@ class Featurizer(TransformerMixin):
             features_word.append("pos")
             out = [self.pos(text, d)
                       for text, d in zip(X, out)]
+        if "word_length" in self.features:
+            features_word.append("word_length")
+            out = [self.word_length(text, d)
+                      for text, d in zip(X, out)]
+        if "surrounding_tokens" in self.features:
+            features_word.append("surrounding_tokens")
+            out = [self.surrounding_tokens(text, d)
+                      for text, d in zip(X, out)]
         print("[Features]: {}".format(", ".join(features_word)))
         return out
 
@@ -81,9 +89,9 @@ class Featurizer(TransformerMixin):
         Sets the POS-tag of spacy trained on Dutch of the previous and next word as a feature, if applicable
         """
         if text[1]:
-            d['b'+text[1].pos_] = 1
+            d['before_pos'] = text[1].pos_
         if text[2]:
-            d['e'+text[2].pos_] = 1
+            d['after_pos'] = text[2].pos_
         return d
     
     def word_length(self, text, d):
@@ -91,6 +99,16 @@ class Featurizer(TransformerMixin):
         Sets word length as a feature
         """
         d[len(text[0].text)] = 1
+        return d
+
+    def surrounding_tokens(self, text, d):
+        """
+        Sets the previous and next token as features
+        """
+        if text[1]:
+            d['before'] = text[1].text
+        if text[2]:
+            d['after'] = text[2].text
         return d
 
 def read_data(filename):
@@ -172,7 +190,7 @@ def main():
         # exit()
 
     featurizer = Featurizer(features)
-    vectorizer = DictVectorizer()
+    vectorizer = DictVectorizer(sort=False)
     
     if sys.argv[1] == "CrossValidation":
         print("Cross validation may take a while to show its first results.")
@@ -184,7 +202,7 @@ def main():
         prec_total = 0
         rec_total = 0
         f1_total = 0
-        
+
         for train_index, test_index in KFold(n_splits=10, random_state=None, shuffle=False).split(X_feats):
             X_train, X_test = X_feats[train_index], X_feats[test_index]
             y_train, y_test = y_feats[train_index], y_feats[test_index]
