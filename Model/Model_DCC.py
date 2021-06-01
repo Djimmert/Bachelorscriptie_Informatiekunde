@@ -182,17 +182,21 @@ def train_baseline(X_train, y_train):
 
 def main():
 
+    # mode = 'CrossValidation'
+    # features = ['first_word', 'surrounding_tokens']
+
+    # Uncomment the above two lines and comment the next five lines of code to make the code work in iPython
+
+    mode = sys.argv[1]
     if sys.argv[2:]:
         features = sys.argv[2:]
     else:
         features = []
-        # sys.stderror.write("Please give at least one of (capital | first_word | pos) as second or further command line arguments\nE.g.: python3 Model_DCC.py CrossValidation token capital")
-        # exit()
 
     featurizer = Featurizer(features)
     vectorizer = DictVectorizer(sort=False)
     
-    if sys.argv[1] == "CrossValidation":
+    if mode == "CrossValidation":
         print("Cross validation may take a while to show its first results.")
         X_feats, y_feats = read_data("gro-ner-train.csv")
 
@@ -233,7 +237,7 @@ def main():
         print("[Average] Recall: {}".format(rec_total/10))
         print("[Average] F1-score: {}".format(f1_total/10))
 
-    elif sys.argv[1] == "Test":
+    elif mode == "Test":
         X_train, y_train = read_data("gro-ner-train.csv")
         X_test, y_test = read_data("gro-ner-test.csv")
 
@@ -253,7 +257,7 @@ def main():
         print(sklearn.metrics.recall_score(y_test, y_pred, average="macro", zero_division=0))
         print(sklearn.metrics.f1_score(y_test, y_pred, average="macro", zero_division=0))
 
-    elif sys_argv[1] == "Baseline":
+    elif mode == "Baseline":
         X_train, y_train = read_data("gro-ner-train.csv")
         X_test, y_test = read_data("gro-ner-test.csv")
 
