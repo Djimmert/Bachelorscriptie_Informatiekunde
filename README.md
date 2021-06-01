@@ -1,18 +1,18 @@
 Naïve Bayes
 
-Precision	0.22
+Precision	0.33
 
-Recall	0.17
+Recall	0.16
 
 F1	0.19
 
 
 Support Vector Classifier
 
-Precision	0.84
+Precision	0.93
 
-Recall	0.51
+Recall	0.47
 
-F1	0.60
+F1	0.58
 
 These scores are macro averages of the scores per label.
