@@ -169,12 +169,12 @@ def read_data(filename):
             
     return X_feats, y_feats
 
-def train(X_train, y_train):
+def train_SVC(X_train, y_train):
     classifier = svm.SVC(kernel='linear').fit(X_train, y_train)
 
     return classifier
 
-def train_baseline(X_train, y_train):
+def train_NB(X_train, y_train):
     classifier = MultinomialNB().fit(X_train, y_train)
     
     return classifier
@@ -217,7 +217,7 @@ def main():
             X_train_ = vectorizer.fit_transform(X_train_dict)
             X_test_ = vectorizer.transform(X_test_dict)
 
-            classifier = train(X_train_, y_train)
+            classifier = train_SVC(X_train_, y_train)
             
             y_pred = classifier.predict(X_test_)
 
@@ -237,7 +237,7 @@ def main():
         print("[Average] Recall: {}".format(rec_total/10))
         print("[Average] F1-score: {}".format(f1_total/10))
 
-    elif mode == "Test":
+    elif mode == "SVC_Test":
         X_train, y_train = read_data("gro-ner-train.csv")
         X_test, y_test = read_data("gro-ner-test.csv")
 
@@ -248,21 +248,18 @@ def main():
         X_test_ = vectorizer.transform(X_test_dict)
 
         # SVC
-        classifier = train(X_train_, y_train)
+        classifier = train_SVC(X_train_, y_train)
         # Evaluation
-        sklearn.metrics.plot_confusion_matrix(classifier, X_test_, y_test)
+        # sklearn.metrics.plot_confusion_matrix(classifier, X_test_, y_test)
         y_pred = classifier.predict(X_test_)
         print("Support vector classifier")
         print(sklearn.metrics.precision_score(y_test, y_pred, average="macro", zero_division=0))
         print(sklearn.metrics.recall_score(y_test, y_pred, average="macro", zero_division=0))
         print(sklearn.metrics.f1_score(y_test, y_pred, average="macro", zero_division=0))
 
-    elif mode == "Baseline":
+    elif mode == "NB_Test":
         X_train, y_train = read_data("gro-ner-train.csv")
         X_test, y_test = read_data("gro-ner-test.csv")
-
-        featurizer = Featurizer()
-        vectorizer = DictVectorizer()
 
         X_train_dict = featurizer.fit_transform(X_train)
         X_test_dict = featurizer.transform(X_test)
@@ -271,17 +268,17 @@ def main():
         X_test_ = vectorizer.transform(X_test_dict)
 
         # NB
-        classifier = train_baseline(X_train_, y_train)
+        classifier = train_NB(X_train_, y_train)
 
         # Evaluation
-        sklearn.metrics.plot_confusion_matrix(classifier, X_test_, y_test)
+        # sklearn.metrics.plot_confusion_matrix(classifier, X_test_, y_test)
         y_pred = classifier.predict(X_test_)
-        print("Multinomial NB baseline")
+        print("Multinomial NB")
         print(sklearn.metrics.precision_score(y_test, y_pred, average="macro", zero_division=0))
         print(sklearn.metrics.recall_score(y_test, y_pred, average="macro", zero_division=0))
         print(sklearn.metrics.f1_score(y_test, y_pred, average="macro", zero_division=0))
     else:
-        sys.stderror.write("Please give one of (CrossValidation | Test | Baseline) as a first command line argument\nE.g.: python3 Model_DCC.py CrossValidation token capital")
+        sys.stderror.write("Please give one of (CrossValidation | Test_SVC | Test_NB) as a first command line argument\nE.g.: python3 Model_DCC.py CrossValidation token capital")
         exit()
 
 if __name__ == '__main__':
